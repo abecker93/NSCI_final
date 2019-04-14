@@ -1,13 +1,15 @@
 #look at motif structures in purely random specialization networks (count feed-forward loops and feed-back loops)
 
+source('./NSCI_final/find_triangles.R')
+
 motifs_fbl <- as.list(1:2)
 motifs_ffl <- as.list(1:6)
 
 motifs_fbl[[1]] <- matrix(c(0,1,0,0,0,1,1,0,0),ncol=3, nrow=3, byrow=T)
 motifs_fbl[[2]] <- matrix(c(0,0,1,1,0,0,0,1,0),ncol=3, nrow=3, byrow=T)
 motifs_ffl[[1]] <- matrix(c(0,1,1,0,0,0,0,1,0),ncol=3, nrow=3, byrow=T)
-motifs_ffl[[2]] <- matrix(c(0,1,1,0,1,0,0,0,0),ncol=3, nrow=3, byrow=T)
-motifs_ffl[[3]] <- matrix(c(0,0,0,0,1,0,1,1,0),ncol=3, nrow=3, byrow=T)
+motifs_ffl[[2]] <- matrix(c(0,1,1,0,0,1,0,0,0),ncol=3, nrow=3, byrow=T)
+motifs_ffl[[3]] <- matrix(c(0,0,0,1,0,0,1,1,0),ncol=3, nrow=3, byrow=T)
 motifs_ffl[[4]] <- matrix(c(0,1,0,0,0,0,1,1,0),ncol=3, nrow=3, byrow=T)
 motifs_ffl[[5]] <- matrix(c(0,0,1,1,0,1,0,0,0),ncol=3, nrow=3, byrow=T)
 motifs_ffl[[6]] <- matrix(c(0,0,0,1,0,1,1,0,0),ncol=3, nrow=3, byrow=T)
@@ -18,30 +20,6 @@ counts_fbl <- 1:length(files)
 counts_ffl <- 1:length(files)
 counts_nodes <- 1:length(files)
 count_tot <- 1:length(files)
-
-find_triangles <- function(matrix){
-  n <- ncol(matrix)
-  num_tri <- 0
-  tri_list <- matrix(numeric(0), ncol=3, nrow=0)
-  for(i in 1:n){
-    j_vals <- which(matrix[i,]!=0)
-    j_vals <- j_vals[j_vals>i]
-    for(j in j_vals){
-      k_vals <- which(matrix[j,]!=0)
-      k_vals <- k_vals[k_vals>j]
-      for(k in k_vals){
-        if(matrix[k,i]==1){
-          num_tri=num_tri+1
-          tri_list <- rbind(tri_list, c(i,j,k))
-        }
-      }
-    }
-  }
-  final <- as.list(1:2)
-  final[[1]] <- num_tri
-  final[[2]] <- tri_list
-  return(final)
-}
 
 for(i in 1:length(files)){
   adj_mat <- as.matrix(read.csv(paste('./specRandNets/',files[i],sep=""), header=F))
@@ -94,8 +72,7 @@ for(i in 1:length(files)){
     b <- which(nodes==edg_lst[j,2])
     adj_mat[a,b] <- 1
   }
-  m <- ncol(adj_mat)
-  counts_nodes[i] <- m
+  counts_nodes[i] <- n
   triangles <- find_triangles(adj_mat)
   locs <- triangles[[2]]
   count_tot[i] <- triangles[[1]]
@@ -116,7 +93,6 @@ for(i in 1:length(files)){
           count_ffl <- count_ffl+1
         }
       }
-      print(tri_mat)
     }
   }
   counts_fbl[i] <- count_fbl
